@@ -6,3 +6,4 @@ authors = ["Henrik Nygren <nygrenh@gmail.com>"]
 [dependencies]
 simple_parallel = "0.3"
 num_cpus = "0.2"
+clippy = "*"

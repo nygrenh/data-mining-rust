@@ -31,8 +31,8 @@ impl<'a> Student<'a> {
         Student { courses: courses.into_iter().collect() }
     }
 
-    pub fn create<'b>(data: &str) -> Box<Vec<Student>> {
-        let students = Mutex::new(Box::new(Vec::new()));
+    pub fn create(data: &str) -> Vec<Student> {
+        let students = Mutex::new(Vec::new());
         let mut pool = simple_parallel::Pool::new(num_cpus::get());
         pool.for_(data.split('\n'), |line| {
             students.lock().unwrap().push(Student::new(line));

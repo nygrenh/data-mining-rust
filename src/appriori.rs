@@ -1,6 +1,6 @@
 use student::Student;
 
-pub fn sequental(students: Box<Vec<Student>>,
+pub fn sequental(students: Vec<Student>,
                  sequence_length: u8,
                  top_considered: u8,
                  support: f32) {
