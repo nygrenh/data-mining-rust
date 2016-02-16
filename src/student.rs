@@ -5,7 +5,8 @@ extern crate num_cpus;
 
 #[derive(Eq, PartialEq, Hash, Clone)]
 pub struct Student<'a> {
-    courses: Vec<Course<'a>>,
+    pub courses: Vec<Course<'a>>,
+    pub course_codes: Vec<u32>
 }
 
 impl<'a> Student<'a> {
@@ -20,7 +21,7 @@ impl<'a> Student<'a> {
             courses.insert(Course {
                 year: year.parse().unwrap(),
                 time: splitted[i],
-                code: splitted[i + 1],
+                code: splitted[i + 1].parse().unwrap(),
                 name: splitted[i + 2],
                 credits: splitted[i + 3],
                 grade: splitted[i + 4],
@@ -28,7 +29,9 @@ impl<'a> Student<'a> {
             });
             i += 5;
         }
-        Student { courses: courses.into_iter().collect() }
+        let courses2: Vec<Course> = courses.into_iter().collect();
+        let codes = Student::collect_course_codes(&courses2);
+        Student { courses: courses2, course_codes: codes }
     }
 
     pub fn create(data: &str) -> Vec<Student> {
@@ -39,15 +42,23 @@ impl<'a> Student<'a> {
         });
         students.into_inner().unwrap()
     }
+
+    fn collect_course_codes(courses: &[Course]) -> Vec<u32> {
+        let mut res = Vec::new();
+        for course in courses {
+            res.push(course.code);
+        }
+        res
+    }
 }
 
 #[derive(Eq, PartialEq, Hash, Clone)]
 pub struct Course<'a> {
-    time: &'a str,
-    year: i32,
-    month: i8,
-    code: &'a str,
-    credits: &'a str,
-    grade: &'a str,
-    name: &'a str,
+    pub time: &'a str,
+    pub year: u16,
+    pub month: u8,
+    pub code: u32,
+    pub credits: &'a str,
+    pub grade: &'a str,
+    pub name: &'a str,
 }

@@ -7,3 +7,4 @@ authors = ["Henrik Nygren <nygrenh@gmail.com>"]
 simple_parallel = "0.3"
 num_cpus = "0.2"
 clippy = "*"
+itertools = "0.4"
