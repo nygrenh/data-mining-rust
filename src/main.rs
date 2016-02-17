@@ -10,5 +10,5 @@ use student::Student;
 fn main() {
     let data = include_str!("data-2016.csv");
     let students = Student::create(data);
-    appriori::appriori(students, 0.1);
+    appriori::appriori(students, 0.04);
 }

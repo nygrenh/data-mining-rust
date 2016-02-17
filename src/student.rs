@@ -54,7 +54,7 @@ impl<'a> Student<'a> {
     }
 }
 
-#[derive(Eq, PartialEq, Hash, Clone)]
+#[derive(Eq, Hash, Clone)]
 pub struct Course<'a> {
     pub time: &'a str,
     pub year: u16,
@@ -68,5 +68,11 @@ pub struct Course<'a> {
 impl<'a> fmt::Debug for Course<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Course#{}", self.code)
+    }
+}
+
+impl<'a> PartialEq for Course<'a> {
+    fn eq(&self, other: &Course) -> bool {
+        self.code == other.code
     }
 }

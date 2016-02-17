@@ -9,28 +9,32 @@ use student::Course;
 
 pub fn appriori(students: Vec<Student>,
                  desired_support: f32) {
+    println!("Starting appriori with support {:?}", desired_support);
     println!("Generating level 1...");
-    let mut courses: Vec<Vec<&Course>> = students.iter().flat_map(|student| &student.courses ).unique().map(|course| {
+    let mut courses: Vec<Vec<&Course>> = students.iter().flat_map(|student| &student.courses ).unique_by(|c| c.code ).map(|course| {
         let mut inner: Vec<&Course> = Vec::new();
         inner.push(course);
         inner
     }).collect();
+
     println!("First level has been generated!");
     let mut level = 1;
     while !courses.is_empty() {
         let safe_next_level: Mutex<Vec<Vec<&Course>>> = Mutex::new(Vec::new());
-        println!("Starting level {:?}...", level);
         let mut pool = simple_parallel::Pool::new(num_cpus::get());
         pool.for_(&courses, |course| {
             let support = calculate_support(&students, &course);
-            if support <= desired_support {
+            if support >= desired_support {
                 safe_next_level.lock().unwrap().push(course.clone());
             }
         });
         let next_level = safe_next_level.into_inner().unwrap();
         println!("Level {:?} complete! Found {:?} combinations with enough support.", level, next_level.len());
+        if level == 4 {
+            break;
+        }
         level += 1;
-        courses = generate(courses);
+        courses = generate(next_level);
         println!("Starting to generate level {:?} candidates...", level);
     }
 }
@@ -42,7 +46,7 @@ pub fn calculate_support(students: &[Student], courses: &[&Course]) -> f32 {
             count += 1
         }
     }
-    (count / students.len()) as f32
+    (count as f32 / students.len() as f32) as f32
 }
 
 pub fn generate<'a>(courses: Vec<Vec<&'a Course>>) -> Vec<Vec<&'a Course<'a>>> {
