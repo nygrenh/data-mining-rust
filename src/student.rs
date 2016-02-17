@@ -54,15 +54,15 @@ impl<'a> Student<'a> {
     }
 }
 
-#[derive(Eq, Hash, Clone)]
+#[derive(Eq, Hash, Clone, PartialOrd, Ord)]
 pub struct Course<'a> {
+    pub code: u32,
+    pub name: &'a str,
     pub time: &'a str,
     pub year: u16,
     pub month: u8,
-    pub code: u32,
     pub credits: &'a str,
     pub grade: &'a str,
-    pub name: &'a str,
 }
 
 impl<'a> fmt::Debug for Course<'a> {

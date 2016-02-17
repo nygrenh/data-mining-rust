@@ -16,6 +16,7 @@ pub fn appriori(students: Vec<Student>,
         inner.push(course);
         inner
     }).collect();
+    courses.sort();
 
     println!("First level has been generated!");
     let mut level = 1;
@@ -28,12 +29,13 @@ pub fn appriori(students: Vec<Student>,
                 safe_next_level.lock().unwrap().push(course.clone());
             }
         });
-        let next_level = safe_next_level.into_inner().unwrap();
+        let mut next_level = safe_next_level.into_inner().unwrap();
         println!("Level {:?} complete! Found {:?} combinations with enough support.", level, next_level.len());
         if level == 4 {
             break;
         }
         level += 1;
+        next_level.sort();
         courses = generate(next_level);
         println!("Starting to generate level {:?} candidates...", level);
     }
@@ -61,14 +63,14 @@ pub fn generate<'a>(courses: Vec<Vec<&'a Course>>) -> Vec<Vec<&'a Course<'a>>> {
         let mut index2: usize = index + 1;
         while index2 < courses.len() {
             let second =  &courses[index2];
-            if adding_makes_sense(first, second) {
-                res.push(union(first, second));
+            if !adding_makes_sense(first, second) {
+                break;
             }
+            res.push(union(first, second));
             index2 += 1;
         }
         index += 1;
     }
-
     res
 }
 
