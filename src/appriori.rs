@@ -21,24 +21,46 @@ pub fn appriori(students: Vec<Student>,
     println!("First level has been generated!");
     let mut level = 1;
     while !courses.is_empty() {
-        let safe_next_level: Mutex<Vec<Vec<&Course>>> = Mutex::new(Vec::new());
+        let safe_survivors: Mutex<Vec<Vec<&Course>>> = Mutex::new(Vec::new());
         let mut pool = simple_parallel::Pool::new(num_cpus::get());
         pool.for_(&courses, |course| {
             let support = calculate_support(&students, &course);
             if support >= desired_support {
-                safe_next_level.lock().unwrap().push(course.clone());
+                safe_survivors.lock().unwrap().push(course.clone());
             }
         });
-        let mut next_level = safe_next_level.into_inner().unwrap();
-        println!("Level {:?} complete! Found {:?} combinations with enough support.", level, next_level.len());
+        let mut survivors = safe_survivors.into_inner().unwrap();
+        println!("Level {:?} complete! Found {:?} combinations with enough support.", level, survivors.len());
         if level == 4 {
             break;
         }
         level += 1;
-        next_level.sort();
-        courses = generate(next_level);
+        survivors.sort();
+        courses = generate(&survivors);
+        println!("Generated {:?} candidates", courses.len());
+        courses = prune(courses, &survivors);
+        println!("{:?} candidates survived prune", courses.len());
         println!("Starting to generate level {:?} candidates...", level);
     }
+}
+
+pub fn prune<'a>(courses: Vec<Vec<&'a Course>>, prev: &Vec<Vec<&'a Course>>) -> Vec<Vec<&'a Course<'a>>> {
+    let mut res = Vec::new();
+    for course in courses {
+        let mut all = true;
+        for i in 0..(course.len()) {
+            let mut test = course.clone();
+            test.remove(i);
+            if !prev.contains(&test) {
+                all = false;
+                break;
+            }
+        }
+        if all {
+            res.push(course);
+        }
+    }
+    res
 }
 
 pub fn calculate_support(students: &[Student], courses: &[&Course]) -> f32 {
@@ -51,7 +73,7 @@ pub fn calculate_support(students: &[Student], courses: &[&Course]) -> f32 {
     (count as f32 / students.len() as f32) as f32
 }
 
-pub fn generate<'a>(courses: Vec<Vec<&'a Course>>) -> Vec<Vec<&'a Course<'a>>> {
+pub fn generate<'a>(courses: &Vec<Vec<&'a Course>>) -> Vec<Vec<&'a Course<'a>>> {
     let mut res = Vec::new();
     if courses.len() <= 1 {
         return res;
