@@ -1,5 +1,7 @@
 use std::collections::HashSet;
 use std::sync::Mutex;
+use std::fmt;
+
 extern crate simple_parallel;
 extern crate num_cpus;
 
@@ -61,4 +63,10 @@ pub struct Course<'a> {
     pub credits: &'a str,
     pub grade: &'a str,
     pub name: &'a str,
+}
+
+impl<'a> fmt::Debug for Course<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Course#{}", self.code)
+    }
 }
