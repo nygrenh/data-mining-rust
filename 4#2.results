@@ -1,0 +1,13 @@
+Starting appriori with support 0.04
+Generating level 1...
+First level has been generated!
+Level 1 complete! Found 122 combinations with enough support.
+Starting to generate level 2 candidates...
+Level 2 complete! Found 1370 combinations with enough support.
+Starting to generate level 3 candidates...
+Level 3 complete! Found 8552 combinations with enough support.
+Starting to generate level 4 candidates...
+Level 4 complete! Found 37791 combinations with enough support.
+real 0.91
+user 4.68
+sys 0.25
