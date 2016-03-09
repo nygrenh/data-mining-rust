@@ -8,9 +8,7 @@ use bit_set::BitSet;
 use std::collections::HashSet;
 
 
-pub fn appriori(students: Vec<BitSet>,
-                 desired_support: f32,
-                 number_of_courses: usize) {
+pub fn appriori(students: Vec<BitSet>, desired_support: f32, number_of_courses: usize) {
     println!("Starting appriori with support {:?}", desired_support);
     println!("Generating level 1...");
 
@@ -36,21 +34,23 @@ pub fn appriori(students: Vec<BitSet>,
             }
         });
         let mut survivors = safe_survivors.into_inner().unwrap();
-        println!("Level {:?} complete! Found {:?} combinations with enough support.", level, survivors.len());
+        println!("Level {:?} complete! Found {:?} combinations with enough support.",
+                 level,
+                 survivors.len());
         if level == 17 {
             println!("The longest course combinations are: {:?}", survivors);
             return;
         }
         level += 1;
         survivors.sort();
-        //println!("Survivors: {:?}", survivors);
+        // println!("Survivors: {:?}", survivors);
         println!("Starting to generate level {:?} candidates...", level);
         courses = generate(&survivors);
-        //println!("courses: {:?}", courses);
-        //println!("Generated: {:?}", courses);1
+        // println!("courses: {:?}", courses);
+        // println!("Generated: {:?}", courses);1
         println!("Generated {:?} candidates", courses.len());
-        //courses = prune(&courses, &survivors);
-        //println!("{:?} candidates survived prune", courses.len());
+        // courses = prune(&courses, &survivors);
+        // println!("{:?} candidates survived prune", courses.len());
 
     }
 }
@@ -61,7 +61,7 @@ pub fn prune(courses: &Vec<BitSet>, prev: &Vec<BitSet>) -> Vec<BitSet> {
     let hash_set: HashSet<BitSet> = prev.clone().into_iter().collect();
     let mut pool = simple_parallel::Pool::new(num_cpus::get());
     let res: Mutex<Vec<BitSet>> = Mutex::new(Vec::new());
-    pool.for_(courses, |course|{
+    pool.for_(courses, |course| {
         let contents: Vec<usize> = course.iter().collect();
         let mut all = true;
         for i in 0..(course.len()) {
@@ -97,7 +97,7 @@ pub fn generate<'a>(courses: &Vec<BitSet>) -> Vec<BitSet> {
         let first = &courses[index];
         let mut index2: usize = index + 1;
         while index2 < courses.len() {
-            let second =  &courses[index2];
+            let second = &courses[index2];
             if !adding_makes_sense(first, second) {
                 break;
             }

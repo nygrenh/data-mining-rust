@@ -8,7 +8,7 @@ extern crate num_cpus;
 #[derive(Eq, PartialEq, Hash, Clone)]
 pub struct Student<'a> {
     pub courses: Vec<Course<'a>>,
-    pub course_codes: Vec<u32>
+    pub course_codes: Vec<u32>,
 }
 
 impl<'a> Student<'a> {
@@ -33,7 +33,10 @@ impl<'a> Student<'a> {
         }
         let courses2: Vec<Course> = courses.into_iter().collect();
         let codes = Student::collect_course_codes(&courses2);
-        Student { courses: courses2, course_codes: codes }
+        Student {
+            courses: courses2,
+            course_codes: codes,
+        }
     }
 
     pub fn create(data: &str) -> Vec<Student> {
