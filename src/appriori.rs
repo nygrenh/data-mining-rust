@@ -3,23 +3,22 @@ use std::sync::Mutex;
 
 extern crate simple_parallel;
 extern crate num_cpus;
-extern crate bit_vec;
+extern crate bit_set;
 
 use student::Student;
 use student::Course;
-use bit_vec::BitVec;
+use bit_set::BitSet;
 
-pub fn appriori(students: Vec<BitVec>,
-                 desired_support: f32) {
+pub fn appriori(students: Vec<BitSet>,
+                 desired_support: f32,
+                 number_of_courses: usize) {
     println!("Starting appriori with support {:?}", desired_support);
     println!("Generating level 1...");
 
-    let courses_count = students[0].len();
-    println!("courses_count {:?}", courses_count);
-    let mut courses: Vec<BitVec> = Vec::new();
-    for i in 0..courses_count {
-        let mut vector = BitVec::from_elem(courses_count, false);
-        vector.set(i, true);
+    let mut courses: Vec<BitSet> = Vec::new();
+    for i in 0..number_of_courses {
+        let mut vector = BitSet::with_capacity(number_of_courses);
+        vector.insert(i);
         courses.push(vector)
     }
 
@@ -28,61 +27,61 @@ pub fn appriori(students: Vec<BitVec>,
     println!("First level has been generated!");
     let mut level = 1;
     while !courses.is_empty() {
-        let safe_survivors: Mutex<Vec<BitVec>> = Mutex::new(Vec::new());
+        let safe_survivors: Mutex<Vec<BitSet>> = Mutex::new(Vec::new());
         let mut pool = simple_parallel::Pool::new(num_cpus::get());
         pool.for_(&courses, |course| {
             let support = calculate_support(&students, &course);
+            // println!("support: {:?}", support);
             if support >= desired_support {
                 safe_survivors.lock().unwrap().push(course.clone());
             }
         });
         let mut survivors = safe_survivors.into_inner().unwrap();
         println!("Level {:?} complete! Found {:?} combinations with enough support.", level, survivors.len());
-        if level == 4 {
-            break;
+        if level == 17 {
+            println!("The longest course combinations are: {:?}", survivors);
+            return;
         }
         level += 1;
         survivors.sort();
-        courses = generate(&survivors);
-        println!("Generated {:?} candidates", courses.len());
-        // courses = prune(courses, &survivors);
-        // println!("{:?} candidates survived prune", courses.len());
+        //println!("Survivors: {:?}", survivors);
         println!("Starting to generate level {:?} candidates...", level);
+        courses = generate(&survivors);
+        //println!("courses: {:?}", courses);
+        //println!("Generated: {:?}", courses);1
+        println!("Generated {:?} candidates", courses.len());
+        courses = prune(&courses, &survivors);
+        println!("{:?} candidates survived prune", courses.len());
+
     }
 }
 
-// pub fn prune<'a>(courses: Vec<Vec<&'a Course>>, prev: &Vec<Vec<&'a Course>>) -> Vec<Vec<&'a Course<'a>>> {
-//     let mut res = Vec::new();
-//     for course in courses {
-//         let mut all = true;
-//         for i in 0..(course.len()) {
-//             let mut test = course.clone();
-//             test.remove(i);
-//             if !prev.contains(&test) {
-//                 all = false;
-//                 break;
-//             }
-//         }
-//         if all {
-//             res.push(course);
-//         }
-//     }
-//     res
-// }
-//
-pub fn calculate_support(students: &Vec<BitVec>, courses: &BitVec) -> f32 {
-    let mut count = 0;
-    for student_vector in students {
-        let mut diff = courses.clone();
-        diff.difference(student_vector);
-        if diff.none() {
-            count += 1
+#[inline(always)]
+pub fn prune(courses: &Vec<BitSet>, prev: &Vec<BitSet>) -> Vec<BitSet> {
+    let mut res = Vec::new();
+    for course in courses {
+        let mut should_be_tested: Vec<BitSet> = Vec::new();
+        let contents: Vec<usize> = course.iter().collect();
+        for i in 0..(course.len()) {
+            let mut test = course.clone();
+            test.remove(contents[i]);
+            should_be_tested.push(test);
+        }
+        if should_be_tested.iter().all(|t| prev.contains(t)) {
+            res.push(course.clone());
         }
     }
+    res
+}
+
+#[inline(always)]
+pub fn calculate_support(students: &Vec<BitSet>, courses: &BitSet) -> f32 {
+    let count = students.iter().filter(|s| courses.is_subset(s)).count();
     (count as f32 / students.len() as f32) as f32
 }
 
-pub fn generate<'a>(courses: &Vec<BitVec>) -> Vec<BitVec> {
+#[inline(always)]
+pub fn generate<'a>(courses: &Vec<BitSet>) -> Vec<BitSet> {
     let mut res = Vec::new();
     if courses.len() <= 1 {
         return res;
@@ -95,10 +94,8 @@ pub fn generate<'a>(courses: &Vec<BitVec>) -> Vec<BitVec> {
         while index2 < courses.len() {
             let second =  &courses[index2];
             if !adding_makes_sense(first, second) {
-                // println!("Didn't make sense: {:?} and {:?}", first, second);
                 break;
             }
-
             res.push(union(first, second));
             index2 += 1;
         }
@@ -107,27 +104,27 @@ pub fn generate<'a>(courses: &Vec<BitVec>) -> Vec<BitVec> {
     res
 }
 
-pub fn adding_makes_sense<'a>(first: &BitVec, second: &BitVec) -> bool {
-    // TODO: Do we need this?
-    // if (first.len() != second.len()) || first.is_empty() {
-    //     return false;
-    // }
-    let mut count = 0;
-    let limit = first.iter().filter(|x| *x).count() - 1;
-    for i in 0..(first.len() - 1) {
-        if count >= limit {
-            break;
-        }
-        if first.get(i).unwrap() != second.get(i).unwrap() {
+#[inline(always)]
+pub fn adding_makes_sense<'a>(first: &BitSet, second: &BitSet) -> bool {
+    if (first.len() != second.len()) || first.is_empty() {
+        return false;
+    }
+
+    let second_contents: Vec<usize> = second.iter().collect();
+    let mut prev = false;
+    for (index, b) in first.iter().enumerate() {
+        let b2 = second_contents[index];
+        if prev {
             return false;
         }
-        count += 1;
+        if b != b2 {
+            prev = true;
+        }
     }
     true
 }
 
-pub fn union<'a>(first: &BitVec, second: &BitVec) -> BitVec {
-    let mut result = first.clone();
-    result.union(second);
-    result
+#[inline(always)]
+pub fn union<'a>(first: &BitSet, second: &BitSet) -> BitSet {
+    first.union(second).collect()
 }
