@@ -1,13 +1,12 @@
-use itertools::Itertools;
 use std::sync::Mutex;
 
 extern crate simple_parallel;
 extern crate num_cpus;
 extern crate bit_set;
 
-use student::Student;
-use student::Course;
 use bit_set::BitSet;
+use std::collections::HashSet;
+
 
 pub fn appriori(students: Vec<BitSet>,
                  desired_support: f32,
@@ -50,28 +49,34 @@ pub fn appriori(students: Vec<BitSet>,
         //println!("courses: {:?}", courses);
         //println!("Generated: {:?}", courses);1
         println!("Generated {:?} candidates", courses.len());
-        courses = prune(&courses, &survivors);
-        println!("{:?} candidates survived prune", courses.len());
+        //courses = prune(&courses, &survivors);
+        //println!("{:?} candidates survived prune", courses.len());
 
     }
 }
 
+#[allow(dead_code)]
 #[inline(always)]
 pub fn prune(courses: &Vec<BitSet>, prev: &Vec<BitSet>) -> Vec<BitSet> {
-    let mut res = Vec::new();
-    for course in courses {
-        let mut should_be_tested: Vec<BitSet> = Vec::new();
+    let hash_set: HashSet<BitSet> = prev.clone().into_iter().collect();
+    let mut pool = simple_parallel::Pool::new(num_cpus::get());
+    let res: Mutex<Vec<BitSet>> = Mutex::new(Vec::new());
+    pool.for_(courses, |course|{
         let contents: Vec<usize> = course.iter().collect();
+        let mut all = true;
         for i in 0..(course.len()) {
             let mut test = course.clone();
             test.remove(contents[i]);
-            should_be_tested.push(test);
+            if !hash_set.contains(&test) {
+                all = false;
+                break;
+            }
         }
-        if should_be_tested.iter().all(|t| prev.contains(t)) {
-            res.push(course.clone());
+        if all {
+            res.lock().unwrap().push(course.clone());
         }
-    }
-    res
+    });
+    res.into_inner().unwrap()
 }
 
 #[inline(always)]
