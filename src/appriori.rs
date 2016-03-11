@@ -18,11 +18,10 @@ pub fn appriori(students: Vec<BitSet>, desired_support: f32, number_of_courses: 
         vector.insert(i);
         courses.push(vector)
     }
-
-    println!("courses: {:?}", courses.len());
-
+    courses = generate(&courses);
     println!("First level has been generated!");
-    let mut level = 1;
+
+    let mut level = 2;
     while !courses.is_empty() {
         let safe_survivors: Mutex<Vec<BitSet>> = Mutex::new(Vec::new());
         let mut pool = simple_parallel::Pool::new(num_cpus::get());
@@ -57,16 +56,16 @@ pub fn appriori(students: Vec<BitSet>, desired_support: f32, number_of_courses: 
 
 #[allow(dead_code)]
 #[inline(always)]
-pub fn prune(courses: &Vec<BitSet>, prev: &Vec<BitSet>) -> Vec<BitSet> {
+pub fn prune(courses: &[BitSet], prev: &Vec<BitSet>) -> Vec<BitSet> {
     let hash_set: HashSet<BitSet> = prev.clone().into_iter().collect();
     let mut pool = simple_parallel::Pool::new(num_cpus::get());
     let res: Mutex<Vec<BitSet>> = Mutex::new(Vec::new());
     pool.for_(courses, |course| {
-        let contents: Vec<usize> = course.iter().collect();
         let mut all = true;
-        for i in 0..(course.len()) {
+
+        for item in course.iter().take(course.len()) {
             let mut test = course.clone();
-            test.remove(contents[i]);
+            test.remove(item);
             if !hash_set.contains(&test) {
                 all = false;
                 break;
@@ -80,13 +79,13 @@ pub fn prune(courses: &Vec<BitSet>, prev: &Vec<BitSet>) -> Vec<BitSet> {
 }
 
 #[inline(always)]
-pub fn calculate_support(students: &Vec<BitSet>, courses: &BitSet) -> f32 {
+pub fn calculate_support(students: &[BitSet], courses: &BitSet) -> f32 {
     let count = students.iter().filter(|s| courses.is_subset(s)).count();
     (count as f32 / students.len() as f32) as f32
 }
 
 #[inline(always)]
-pub fn generate<'a>(courses: &Vec<BitSet>) -> Vec<BitSet> {
+pub fn generate(courses: &[BitSet]) -> Vec<BitSet> {
     let mut res = Vec::new();
     if courses.len() <= 1 {
         return res;
@@ -110,7 +109,7 @@ pub fn generate<'a>(courses: &Vec<BitSet>) -> Vec<BitSet> {
 }
 
 #[inline(always)]
-pub fn adding_makes_sense<'a>(first: &BitSet, second: &BitSet) -> bool {
+pub fn adding_makes_sense(first: &BitSet, second: &BitSet) -> bool {
     if (first.len() != second.len()) || first.is_empty() {
         return false;
     }
@@ -130,6 +129,6 @@ pub fn adding_makes_sense<'a>(first: &BitSet, second: &BitSet) -> bool {
 }
 
 #[inline(always)]
-pub fn union<'a>(first: &BitSet, second: &BitSet) -> BitSet {
+pub fn union(first: &BitSet, second: &BitSet) -> BitSet {
     first.union(second).collect()
 }
