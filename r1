@@ -1,0 +1,59 @@
+Starting appriori with support 0.04
+Generating level 1...
+courses: 380
+First level has been generated!
+Level 1 complete! Found 122 combinations with enough support.
+Starting to generate level 2 candidates...
+Generated 7381 candidates
+Level 2 complete! Found 1370 combinations with enough support.
+Starting to generate level 3 candidates...
+Generated 16135 candidates
+Level 3 complete! Found 8552 combinations with enough support.
+Starting to generate level 4 candidates...
+Generated 58682 candidates
+Level 4 complete! Found 37791 combinations with enough support.
+Starting to generate level 5 candidates...
+Generated 184079 candidates
+Level 5 complete! Found 127702 combinations with enough support.
+Starting to generate level 6 candidates...
+Generated 484604 candidates
+Level 6 complete! Found 340724 combinations with enough support.
+Starting to generate level 7 candidates...
+Generated 1023084 candidates
+Level 7 complete! Found 696640 combinations with enough support.
+Starting to generate level 8 candidates...
+Generated 1644314 candidates
+Level 8 complete! Found 1064758 combinations with enough support.
+Starting to generate level 9 candidates...
+Generated 1955460 candidates
+Level 9 complete! Found 1210840 combinations with enough support.
+Starting to generate level 10 candidates...
+Generated 1712080 candidates
+Level 10 complete! Found 1024791 combinations with enough support.
+Starting to generate level 11 candidates...
+Generated 1100251 candidates
+Level 11 complete! Found 642382 combinations with enough support.
+Starting to generate level 12 candidates...
+Generated 511239 candidates
+Level 12 complete! Found 293872 combinations with enough support.
+Starting to generate level 13 candidates...
+Generated 167687 candidates
+Level 13 complete! Found 95235 combinations with enough support.
+Starting to generate level 14 candidates...
+Generated 37188 candidates
+Level 14 complete! Found 20692 combinations with enough support.
+Starting to generate level 15 candidates...
+Generated 5172 candidates
+Level 15 complete! Found 2686 combinations with enough support.
+Starting to generate level 16 candidates...
+Generated 377 candidates
+Level 16 complete! Found 160 combinations with enough support.
+Starting to generate level 17 candidates...
+Generated 6 candidates
+Level 17 complete! Found 2 combinations with enough support.
+Starting to generate level 18 candidates...
+Generated 0 candidates
+real 47.24
+user 235.02
+sys 19.31
+

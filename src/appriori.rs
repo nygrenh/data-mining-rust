@@ -55,7 +55,7 @@ pub fn appriori(students: Vec<BitSet>, desired_support: f32, number_of_courses: 
 }
 
 #[allow(dead_code)]
-#[inline(always)]
+#[inline]
 pub fn prune(courses: &[BitSet], prev: &Vec<BitSet>) -> Vec<BitSet> {
     let hash_set: HashSet<BitSet> = prev.clone().into_iter().collect();
     let mut pool = simple_parallel::Pool::new(num_cpus::get());
@@ -78,13 +78,13 @@ pub fn prune(courses: &[BitSet], prev: &Vec<BitSet>) -> Vec<BitSet> {
     res.into_inner().unwrap()
 }
 
-#[inline(always)]
+#[inline]
 pub fn calculate_support(students: &[BitSet], courses: &BitSet) -> f32 {
     let count = students.iter().filter(|s| courses.is_subset(s)).count();
     (count as f32 / students.len() as f32) as f32
 }
 
-#[inline(always)]
+#[inline]
 pub fn generate(courses: &[BitSet]) -> Vec<BitSet> {
     let mut res = Vec::new();
     if courses.len() <= 1 {
@@ -108,7 +108,7 @@ pub fn generate(courses: &[BitSet]) -> Vec<BitSet> {
     res
 }
 
-#[inline(always)]
+#[inline]
 pub fn adding_makes_sense(first: &BitSet, second: &BitSet) -> bool {
     if (first.len() != second.len()) || first.is_empty() {
         return false;
@@ -128,7 +128,7 @@ pub fn adding_makes_sense(first: &BitSet, second: &BitSet) -> bool {
     true
 }
 
-#[inline(always)]
+#[inline]
 pub fn union(first: &BitSet, second: &BitSet) -> BitSet {
     first.union(second).collect()
 }
